@@ -56,7 +56,7 @@ public:
 				Cd = 24 * ( 1+0.15*Foam::pow(Re,0.687) ) / Re; 
 			else
 				Cd = 0.44;
-			return Cd/24 * Re * Foam::pow(ep, -3.65 ); 
+			return Cd/24 * Re * Foam::pow(ep, -2.65 ); 
 		}else
 		{
 			return 	(150.0*(1.0-ep)+ 1.75*Re )/(18.0*ep*ep);
