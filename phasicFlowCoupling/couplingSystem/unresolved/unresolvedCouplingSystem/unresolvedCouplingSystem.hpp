@@ -18,88 +18,55 @@ Licence:
 
 -----------------------------------------------------------------------------*/
 
-#ifndef __unresolvedCouplingSystem_hpp__
-#define __unresolvedCouplingSystem_hpp__
+#ifndef __UnresolvedCouplingSystem_hpp__
+#define __UnresolvedCouplingSystem_hpp__
 
 
-#include "couplingSystem.hpp"
-#include "virtualConstructor.hpp"
+#include "unresolvedCouplingSystem.hpp"
 
 
 namespace pFlow::coupling
 {
 
-
-class unresolvedCouplingSystem
+template<typename DistributorType>
+class UnresolvedCouplingSystem
 :
-	public couplingSystem
+	public unresolvedCouplingSystem
 {
+private:
+
+	DistributorType 			cellDistribution_;
+
+protected:
+
+	DistributorType& cellDistribution()
+	{
+		return cellDistribution_;
+	}
 
 public:
 
-	unresolvedCouplingSystem(
+
+	UnresolvedCouplingSystem(
 		word shapeTypeName, 
 		Foam::fvMesh& mesh,
 		int argc, 
 		char* argv[]);
 
-	unresolvedCouplingSystem(const unresolvedCouplingSystem&) = delete;
 	
-	unresolvedCouplingSystem& operator=(const unresolvedCouplingSystem&) = delete;
 
-	unresolvedCouplingSystem(unresolvedCouplingSystem&&) = delete;
+	~UnresolvedCouplingSystem() override = default;
 
-	unresolvedCouplingSystem& operator=(unresolvedCouplingSystem&&) = delete;
 
-	~unresolvedCouplingSystem() override = default;
-
-	create_vCtor
-	(
-		unresolvedCouplingSystem,
-		word,
-		(
-			word demSystemName, 
-			Foam::fvMesh& mesh,
-			int argc, 
-			char* argv[]
-		),
-		(demSystemName, mesh, argc, argv)
-	);
-
-	const Foam::dictionary& unresolvedDict()const
+	const DistributorType& cellDistribution()const
 	{
-		return this->subDict("unresolved");
+		return cellDistribution_;
 	}
-
-	virtual 
-	const Foam::volScalarField& alpha()const =0;
-
-	virtual
-	const Foam::volScalarField& Sp()const =0;
-	
-	virtual
-	const Foam::volVectorField& Su()const =0;
-
-	virtual
-	void calculateFluidInteraction() =0;
-
-	virtual
-	void calculatePorosity() =0;
-
-	virtual 
-	word shapeTypeName() const= 0;
-
-	static
-	uniquePtr<unresolvedCouplingSystem> create
-	(
-		word demSystemName, 
-		Foam::fvMesh& mesh,
-		int argc, 
-		char* argv[]
-	);
 
 }; 
 
 } // pFlow::coupling
 
-#endif //__unresolvedCouplingSystem_hpp__
+#include "UnresolvedCouplingSystem.C"
+
+#endif //__UnresolvedCouplingSystem_hpp__
