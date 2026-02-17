@@ -1,0 +1,65 @@
+/*--------------------------------*- C++ -*----------------------------------*\
+| =========                 |                                                 |
+| \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox           |
+|  \\    /   O peration     | Version:  v2412                                 |
+|   \\  /    A nd           | Website:  www.openfoam.com                      |
+|    \\/     M anipulation  |                                                 |
+\*---------------------------------------------------------------------------*/
+FoamFile
+{
+    version     2.0;
+    format      ascii;
+    class       dictionary;
+    object      couplingProperties;
+}
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+
+unresolved
+{
+    distributionMethod      adaptiveGaussian;
+
+    adaptiveGaussianInfo
+    {
+        maxLayers           1;
+        smoothingFactor     1.0;
+    }
+
+    porosity
+    {
+        method      distribution;
+        alphaMin    0.2;
+    }
+
+    momentumInteraction
+    {
+        momentumExchange    distribution;
+        fluidVelocity       distribution;
+        solidVelocity       particle;
+
+        drag
+        {
+            model           DiFelice;
+            residualRe      1.0e-6;
+        }
+
+        lift
+        {
+            model                   none;
+            surfaceRotationTorque   none;
+            residualRe              1.0e-6;
+        }
+
+        virtualMass
+        {
+        }
+    }
+}
+
+particleMapping
+{
+    domainExpansionRatio    1;
+    domainUpdateInterval    0.01;
+    decompositionMode       facePlanes;
+}
+
+// ************************************************************************* //

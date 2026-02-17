@@ -1,0 +1,41 @@
+#!/bin/sh
+cd ${0%/*} || exit 1    # Run from this directory
+
+# Using two cores for DEM simulations
+export OMP_NUM_THREADS=2
+
+echo "\n<--------------------------------------------------------------------->"
+echo "1) Running blockMesh"
+echo "<--------------------------------------------------------------------->\n"
+blockMesh
+
+echo "\n<--------------------------------------------------------------------->"
+echo "2) Preparing DEM geometry and particles"
+echo "<--------------------------------------------------------------------->\n"
+
+particlesPhasicFlow
+geometryPhasicFlow
+
+echo "\n<--------------------------------------------------------------------->"
+echo "3) Preparing initial CFD fields"
+echo "<--------------------------------------------------------------------->\n"
+
+cp ./FluidField/* ./0
+setFields
+
+echo "\n<--------------------------------------------------------------------->"
+echo "4) Running unresolved VOF-DEM CFD"
+echo "<--------------------------------------------------------------------->\n"
+
+decomposePar
+mpirun -np 4 unresolvedSphereVoFPFPlus -parallel
+reconstructParMesh
+reconstructPar
+
+echo "\n<--------------------------------------------------------------------->"
+echo "5) Writing VTK outputs"
+echo "<--------------------------------------------------------------------->\n"
+foamToVTK -time 0:0.5
+pFlowToVTK -t 0:0.5
+
+#------------------------------------------------------------------------------
