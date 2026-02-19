@@ -48,6 +48,7 @@ public:
         const Foam::scalar epc = Foam::max(ep, Foam::SMALL);
         const Foam::scalar ep2 = epc*epc;
         const Foam::scalar ep3 = ep2*epc;
+        const Foam::scalar ep4 = ep2*ep2;
        
 
         const Foam::scalar K0 = (1.0 - epc)/(1.0 + 3.0*epc);
