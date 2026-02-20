@@ -62,6 +62,8 @@ momentumInteraction::momentumInteraction
 
     lift_ = lift::create(uCS, porosity_);
 
+    virtualMass_ = virtualMass::create(uCS, porosity_);
+
     auto fluidAveragingType = dict().template get<Foam::word>("fluidVelocity");
 
     fluidAveraging_ = fluidAveraging::create(fluidAveragingType, uCS, "fluidVelocity");
@@ -131,6 +133,12 @@ void momentumInteraction::calculateCoupling
         porosity_.particleDiameter(),
         fluidForce,
         fluidTorque);
+
+    virtualMass_->calculateVirtualMassForce(
+        U,
+        vp,
+        porosity_.particleDiameter(),
+        fluidForce);
 
     momentumInteractionTimer_.end();
 
