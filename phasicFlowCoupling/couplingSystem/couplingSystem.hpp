@@ -66,9 +66,13 @@ private:
 
 	Plus::realx3ProcCMField 	particleRVelocity_;
 
+	Plus::realx3ProcCMField 	particleAcceleration_;
+
 	Plus::realx3ProcCMField 	fluidForce_;
 
 	Plus::realx3ProcCMField   	fluidTorque_;
+
+	std::vector<real> 			shapeDiameters_;
 
 	bool requireRVel_;
 
@@ -181,6 +185,12 @@ public:
 	auto numParticles()const
 	{
 		return centerMass().size();
+	}
+
+	inline
+	const auto& shapeDiameters()const
+	{
+		return shapeDiameters_;
 	}
 
 	inline 
