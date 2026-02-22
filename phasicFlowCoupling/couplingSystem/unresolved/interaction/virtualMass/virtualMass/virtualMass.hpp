@@ -14,9 +14,12 @@ class unresolvedCouplingSystem;
 class virtualMass
 {
 private:
-
-    const porosity& porosity_;
-    Foam::Switch printVirtualMass_;
+    
+    /// Reference to porosity object for momentum coupling
+    const porosity&         porosity_;
+    
+    /// Flag to enable/disable virtual mass force field to the output file
+    Foam::Switch         printVirtualMass_;
 
 protected:
 
@@ -48,7 +51,7 @@ public:
     void calculateVirtualMassForce
     (
         const Foam::volVectorField& U,
-        const Plus::realx3ProcCMField& parVel,
+        const Plus::realx3ProcCMField& parAcc,
         const Plus::realProcCMField& diameter,
         Plus::realx3ProcCMField& particleForce
     ) = 0;
@@ -92,3 +95,4 @@ public:
 } // pFlow::coupling
 
 #endif
+
