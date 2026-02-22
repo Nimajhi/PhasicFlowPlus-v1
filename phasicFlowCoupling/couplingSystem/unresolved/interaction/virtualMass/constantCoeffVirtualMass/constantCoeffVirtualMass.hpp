@@ -27,6 +27,7 @@ Licence:
  * The Cvm_ is typically 0.5 for spheres.
  * The virtual mass force is given by:
  * @f[ \mathbf{F}_{vm} = C_{vm} \rho_f V_p \left( \frac{D\mathbf{u}_f}{Dt} - \frac{d\mathbf{v}_p}{dt} \right) @f]
+
 */
 
 #ifndef __constantCoeffVirtualMass_hpp__
@@ -50,12 +51,9 @@ private:
     /// constant coefficient of virtual mass
     Foam::scalar 	Cvm_;
     
-    /// old particle velocity for calculating the particle acceleration 
-    Plus::realx3ProcCMField oldParVel_;
-    
-    /// tracking old velocity availability
-    Plus::int32ProcCMField  hasOldParVel_;
-    
+    /// is flow compressible 
+    bool isCompressible_ = false;
+        
 public:
 
     TypeInfo("constantCoeff");
@@ -74,7 +72,7 @@ public:
     void calculateVirtualMassForce
     (
         const Foam::volVectorField& U,
-        const Plus::realx3ProcCMField& parVel,
+        const Plus::realx3ProcCMField& parAcc,
         const Plus::realProcCMField& diameter,
         Plus::realx3ProcCMField& particleForce
     ) override;
@@ -84,6 +82,13 @@ public:
     {
         return tmpVirtualMassForce_;
     }
+    
+    inline 
+    bool isCompressible()const
+    {
+        return isCompressible_;
+    }
+    
 };
 
 } // pFlow::coupling
