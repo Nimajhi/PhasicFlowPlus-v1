@@ -32,7 +32,7 @@ public:
     void calculateVirtualMassForce
     (
         const Foam::volVectorField& U,
-        const Plus::realx3ProcCMField& parVel,
+        const Plus::realx3ProcCMField& parAcc,
         const Plus::realProcCMField& diameter,
         Plus::realx3ProcCMField& particleForce
     ) override;
@@ -44,5 +44,6 @@ public:
 };
 
 } // pFlow::coupling
+
 
 #endif
