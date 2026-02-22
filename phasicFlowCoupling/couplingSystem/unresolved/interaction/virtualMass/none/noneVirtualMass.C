@@ -16,7 +16,7 @@ pFlow::coupling::noneVirtualMass::noneVirtualMass
             "virtualMassForce",
             Foam::timeName(this->mesh().time()),
             this->mesh(),
-            Foam::IOobject::READ_IF_PRESENT,
+            Foam::IOobject::NO_READ,
             Foam::IOobject::NO_WRITE
         ),
         this->mesh(),
@@ -32,8 +32,9 @@ pFlow::coupling::noneVirtualMass::noneVirtualMass
 void pFlow::coupling::noneVirtualMass::calculateVirtualMassForce
 (
     const Foam::volVectorField& U,
-    const Plus::realx3ProcCMField& parVel,
+    const Plus::realx3ProcCMField& parAcc,
     const Plus::realProcCMField& diameter,
     Plus::realx3ProcCMField& particleForce
 )
 {}
+
