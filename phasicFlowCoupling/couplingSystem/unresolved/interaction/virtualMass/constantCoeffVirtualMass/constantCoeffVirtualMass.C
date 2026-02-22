@@ -31,8 +31,13 @@ pFlow::coupling::constantCoeffVirtualMass::constantCoeffVirtualMass
 :
     virtualMass(uCS, prsty),
     Cvm_(this->dict().getOrDefault<Foam::scalar>("Cvm", 0.5)),
-    oldParVel_("oldParVel", realx3(0,0,0), uCS.centerMass(), true),
-    hasOldParVel_("hasOldParVel", 0, uCS.centerMass(), true)
+    isCompressible_
+    (
+      this->mesh().template lookupObject<Foam::volScalarField>("p").dimensions() 
+      == Foam::dimPressure
+    )
+
+    
 {
     tmpVirtualMassForce_ = Foam::tmp<Foam::volVectorField>::New
     (
@@ -57,7 +62,7 @@ pFlow::coupling::constantCoeffVirtualMass::constantCoeffVirtualMass
 void pFlow::coupling::constantCoeffVirtualMass::calculateVirtualMassForce
 (
     const Foam::volVectorField& U,
-    const Plus::realx3ProcCMField& parVel,
+    const Plus::realx3ProcCMField& parAcc,
     const Plus::realProcCMField& diameter,
     Plus::realx3ProcCMField& particleForce
 )
@@ -70,16 +75,24 @@ void pFlow::coupling::constantCoeffVirtualMass::calculateVirtualMassForce
     }
 
     const auto& rho = this->mesh().template lookupObject<Foam::volScalarField>("rho");
-    const auto& phi = this->mesh().template lookupObject<Foam::surfaceScalarField>("phi");
     const auto& parCellInd = this->parCellIndex();
     const auto& Vcells = this->mesh().V();
-
-    const Foam::scalar dt = this->mesh().time().deltaTValue();
+    const auto& phi = this->mesh().template lookupObject<Foam::surfaceScalarField>("phi");
+    
+    Foam::tmp<Foam::volVectorField> tDDtU;
     
     /// Calculate the material derivative of fluid velocity 
-    auto DDtUPtr = Foam::fvc::ddt(U) + Foam::fvc::div(phi, U);
-    const auto& DDtU = DDtUPtr();
+    if(isCompressible_)
+    {
+        tDDtU  = (fvc::ddt(rho, U) + fvc::div(phi, U))/rho;
+    }
+    else
+    {
+        tDDtU = fvc::ddt(U) + fvc::div(phi, U);
+    }
 
+    const auto& DDtU = tDDtU();
+    
     const size_t nPar = diameter.size();
 
     #pragma omp parallel for schedule(dynamic)
@@ -93,21 +106,12 @@ void pFlow::coupling::constantCoeffVirtualMass::calculateVirtualMassForce
         const Foam::scalar Vp = Foam::constant::mathematical::pi/6.0 * Foam::pow(dp,3.0);
         
         /// calculation for particle acceleration
-        const Foam::vector up(parVel[i].x(), parVel[i].y(), parVel[i].z());
-
-        Foam::vector ap(0,0,0);
-        if(hasOldParVel_[i] == 1)
-        {
-            const Foam::vector upOld(oldParVel_[i].x(), oldParVel_[i].y(), oldParVel_[i].z());
-            ap = (up - upOld)/dt;
-        }
-
-        oldParVel_[i] = realx3(up.x(), up.y(), up.z());
-        hasOldParVel_[i] = 1;
-        
+        const Foam::vector ap(parAcc[i].x(), parAcc[i].y(), parAcc[i].z());
+               
    	/// Calculate virtual mass force
         const Foam::vector vmForce = Cvm_ * rho[cellI] * Vp * (DDtU[cellI] - ap);
-
+        
+    
         particleForce[i] += realx3(vmForce.x(), vmForce.y(), vmForce.z());
 
         #pragma omp atomic
