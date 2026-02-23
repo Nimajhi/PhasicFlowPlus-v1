@@ -125,7 +125,10 @@ Foam::tmp<Foam::volVectorField>
     const auto& SU = momentumInteraction_.Su();
     auto tmpLift = momentumInteraction_.liftForce();
     const auto& lift = tmpLift.ref();
-
+    
+    auto tmpVirtualMass = momentumInteraction_.virtualMassForce();
+    const auto& virtualMass = tmpVirtualMass.ref();
+    
     auto SUall = Foam::tmp<Foam::volVectorField>::New
     (
         Foam::IOobject
@@ -137,7 +140,7 @@ Foam::tmp<Foam::volVectorField>
             Foam::IOobject::NO_WRITE,
             false
         ),
-        SU + lift
+        SU + lift + virtualMass
     );
     return SUall;
 }
